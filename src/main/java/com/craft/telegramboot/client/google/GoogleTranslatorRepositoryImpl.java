@@ -20,16 +20,17 @@ public class GoogleTranslatorRepositoryImpl implements TranslatorRepository {
 
     private final ObjectMapper objectMapper;
     private final RapidApiConfiguration rapidApiConfiguration;
+    private final OkHttpClient okHttpClient;
 
-    public GoogleTranslatorRepositoryImpl(ObjectMapper objectMapper, RapidApiConfiguration rapidApiConfiguration) {
+    public GoogleTranslatorRepositoryImpl(ObjectMapper objectMapper, RapidApiConfiguration rapidApiConfiguration, OkHttpClient okHttpClient) {
         this.objectMapper = objectMapper;
         this.rapidApiConfiguration = rapidApiConfiguration;
+        this.okHttpClient = okHttpClient;
     }
 
     @Override
     public Translation translate(String text, String language) throws IOException {
 
-        OkHttpClient client = new OkHttpClient();
         RequestBody body = new FormBody.Builder()
                 .add("source", "en")
                 .add("target", language)
@@ -45,9 +46,9 @@ public class GoogleTranslatorRepositoryImpl implements TranslatorRepository {
                 .addHeader("X-RapidAPI-Host", rapidApiConfiguration.getHost())
                 .build();
 
-        Response response = client.newCall(request).execute();
+        Response response = okHttpClient.newCall(request).execute();
 
-        if(Objects.isNull(response)){
+        if (Objects.isNull(response)) {
             throw new RuntimeException("Response from Google translator is null");
         }
 
@@ -55,10 +56,13 @@ public class GoogleTranslatorRepositoryImpl implements TranslatorRepository {
         return Translation.create(translatedText);
     }
 
-    private String getJsonObjectValue(Response response) throws IOException {
-        
-        GoogleTranslatorRs googleTranslatorRs = objectMapper.readValue(response.body().string(), GoogleTranslatorRs.class);
-        return googleTranslatorRs.getData().getTranslations().get(0).getTranslatedText();
+    private String getJsonObjectValue(Response response) {
+        try {
+            GoogleTranslatorRs googleTranslatorRs = objectMapper.readValue(response.body().string(), GoogleTranslatorRs.class);
+            return googleTranslatorRs.getData().getTranslations().get(0).getTranslatedText();
+        } catch (Exception e) {
+            throw new RuntimeException("Error parsing JSON from Google Translate Response");
+        }
     }
 
 }

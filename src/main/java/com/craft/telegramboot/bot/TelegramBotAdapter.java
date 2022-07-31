@@ -39,7 +39,7 @@ public class TelegramBotAdapter extends TelegramLongPollingBot {
             message.setText(translation.getTranslatedText());
             execute(message);
         } catch (TelegramApiException e) {
-            e.printStackTrace();
+            throw new RuntimeException("Error sending message to Telegram server");
         }
         
     }

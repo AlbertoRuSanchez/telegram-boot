@@ -2,6 +2,7 @@ package com.craft.telegramboot.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.Getter;
+import okhttp3.OkHttpClient;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
@@ -15,6 +16,11 @@ public class BeanConfiguration {
     public ObjectMapper objectMapper(){
         ObjectMapper objectMapper = new ObjectMapper();
         return objectMapper;
+    }
+
+    @Bean
+    public OkHttpClient okHttpClient(){
+        return new OkHttpClient();
     }
 
 
